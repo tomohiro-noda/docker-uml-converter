@@ -3,21 +3,26 @@ Convert docker-compose.yml to plantuml with atom:markdown-preview-enhanced using
 
 ## Purpose
 - Simplicity
+  - Easy to develop
 - Frexibility
+  - Function based microservices
+    - Porting to serverless systems
+
 
 ## Supported service settings
 Must define service settings below in docker-compose.yml
-- Docker-compose v3
-  - services
-  - depends_on
-  - networks
-  - image
-  - ports
-  - aliases
+- Correspondence table
 
-## Supported uml tools
-- Plantuml
-  - component diagram
+| Docker-compose v3 | Plantuml component diagram |
+|:------------------|:---------------------------|
+| services          | components                 |
+| depends_on        | links                      |
+| networks          | package                    |
+| image             | component in cloud         |
+| ports             | properties in component    |
+| aliases           | properties in component    |
+
+
 
 ## Install requirements
 - Ubuntu 16.04
@@ -28,9 +33,13 @@ $ apt-get install -y atom && \
 ```
 
 ## Usage
+- Command
 ```
 $ python dc2uml.py fullpath/inputfile.yml fullpath/outputfile.md
 ```
+
+
+
 ## Examples
 - See [output.md](examples/output.md)
 ![example](examples/output.jpeg)
