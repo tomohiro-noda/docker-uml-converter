@@ -23,6 +23,11 @@ Must define service settings below in docker-compose.yml
 | aliases           | aliases properties in component |
 
 
+## Attention
+Convert below to allowed
+- Forbidden characters
+  - Plantuml
+    - "-" to "_"
 
 ## Install requirements
 - Ubuntu 16.04
