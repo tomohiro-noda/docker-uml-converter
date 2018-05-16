@@ -44,11 +44,14 @@ $ python dc2uml.py fullpath/inputfile.yml fullpath/outputfile.md
 
 
 ## Examples
-- See [output.md](examples/output.md)
+- See an [examples](examples) folder
 ![example](examples/output.jpeg)
 
 ## Future works
 - Refactoring
+  - Redefine Meta processes
+  - Repeated strings to outside
+  - No dependency on requirements version
 - Support
   - Exception cases
   - Other service settings
