@@ -1,0 +1,45 @@
+version: '3'
+services:
+  gitlab-chprot:
+    image: gitlab/gitlab-ce:latest
+    ports:
+      - "443:443"
+      - "22:22"
+      - "7080:80"
+    restart: always
+    networks:
+      mynetwork:
+        aliases:
+          - gitlab.com
+  swagger-ui:
+    image: schickling/swagger-ui
+    ports:
+      - "6080:80"
+    environment:
+      API_URL: http://localhost:4000/swagger
+    restart: always
+    networks:
+      mynetwork:
+        aliases:
+          - swagger-ui.com
+  ubuntu-desktop:
+    image: uphy/ubuntu-desktop-jp:16.04
+    build:
+      context: .
+      args:
+        http_proxy: http://username:pass@ip:port
+        https_proxy: http://username:pass@ip:port
+        no_proxy: localhost,127.0.0.1,gitlab.com,swagger-ui.com
+    ports:
+      - "8080:8080"
+      - "5900:5900"
+    restart: always
+    networks:
+      mynetwork:
+        aliases:
+          - ubuntu-desktop.com
+    depends_on:
+      - gitlab-chprot
+      - swagger-ui
+networks:
+  mynetwork:
