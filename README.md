@@ -10,6 +10,8 @@ Must define service settings below in docker-compose.yml
   - image
   - ports
   - aliases
+- Plantuml
+  - Component diagram
 
 ## Install requirements
 - Ubuntu 16.04
@@ -20,7 +22,7 @@ $ apt-get install -y atom && \
 ```
 
 ## Usage
-```python
+```
 $ python dc2uml.py fullpath/inputfile.yml fullpath/outputfile.md
 ```
 ## Examples
