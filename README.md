@@ -13,14 +13,14 @@ Convert docker-compose.yml to plantuml with atom:markdown-preview-enhanced using
 Must define service settings below in docker-compose.yml
 - Correspondence table
 
-| Docker-compose v3 | Plantuml component diagram |
-|:------------------|:---------------------------|
-| services          | components                 |
-| depends_on        | links                      |
-| networks          | package                    |
-| image             | component in cloud         |
-| ports             | properties in component    |
-| aliases           | properties in component    |
+| Docker-compose v3 | Plantuml component diagram      |
+|:----------------- |:------------------------------- |
+| services          | components                      |
+| depends_on        | links                           |
+| networks          | package                         |
+| image             | component in cloud              |
+| ports             | ports properties in component   |
+| aliases           | aliases properties in component |
 
 
 
