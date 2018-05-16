@@ -10,8 +10,10 @@ Must define service settings below in docker-compose.yml
   - image
   - ports
   - aliases
+
+## Supported uml tools
 - Plantuml
-  - Component diagram
+  - component diagram
 
 ## Install requirements
 - Ubuntu 16.04
@@ -34,6 +36,7 @@ $ python dc2uml.py fullpath/inputfile.yml fullpath/outputfile.md
   - Exception cases
   - Other service settings
   - Dockerfile
+  - Other plantuml diagrams
   - Other text-based uml tools
 - Monolithic to microservices
 
