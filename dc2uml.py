@@ -93,16 +93,16 @@ def combine_dependencies_str(dependencies_dict):
         elif isinstance(v, list):
             for i in v:
                 combined_dependencies_str = combined_dependencies_str \
-                    + '  [' + k + ']' + ' --> ' + '[' + i + ']' + '\n'
+                    + '[' + k + ']' + ' --> ' + '[' + i + ']' + '\n'
         else:
             combined_dependencies_str = combined_dependencies_str \
-                + '  [' + k + ']' + ' --> ' + '[' + v + ']' + '\n'
+                + '[' + k + ']' + ' --> ' + '[' + v + ']' + '\n'
     return combined_dependencies_str
 
 
 def combine_images_str(images_dict):
     combined_images_str = ''
-    prefix = 'cloud ' + 'Docker_hub' + ' {\n'
+    prefix = 'cloud ' + 'Repository' + ' {\n'
     sufix = '}\n'
     for (k, v) in images_dict.items():
         if v is None:
@@ -121,10 +121,10 @@ def combine_images_str(images_dict):
 def make_components_str_dict(components_dict):
     components_str_dict = {}
     prefix = 'component '
-    sufix = ']'
+    sufix = '  ]'
     for (k, v) in components_dict.items():
         tmp = prefix + k + ' [' + k + '''
----
+  ---
 '''
         tmp = _add_ports(tmp, v)
         tmp = _add_aliases(tmp, v)
@@ -138,7 +138,7 @@ def _add_ports(target_str, content_dict):
     poarts_str = ''
     for i in ports:
         poarts_str = poarts_str + str(i) + ','
-    added_str = target_str + ports_define + ':' + poarts_str + '\n'
+    added_str = target_str + '  ' + ports_define + ':' + poarts_str + '\n'
     return added_str
 
 
@@ -147,7 +147,7 @@ def _add_aliases(target_str, content_dict):
     aliases_str = ''
     for i in aliases:
         aliases_str = aliases_str + str(i) + ','
-    added_str = target_str + aliases_define + ':' + aliases_str + '\n'
+    added_str = target_str + '  ' + aliases_define + ':' + aliases_str + '\n'
     return added_str
 
 

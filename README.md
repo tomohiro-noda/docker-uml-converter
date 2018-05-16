@@ -14,7 +14,7 @@ Must define service settings below in docker-compose.yml
 - Correspondence table
 
 | Docker-compose v3 | Plantuml component diagram      |
-|:----------------- |:------------------------------- |
+|:------------------|:--------------------------------|
 | services          | components                      |
 | depends_on        | links                           |
 | networks          | package                         |
@@ -27,9 +27,12 @@ Must define service settings below in docker-compose.yml
 ## Install requirements
 - Ubuntu 16.04
 ```
-$ apt-get install -y atom && \
+$ apt-get update && \
+  apt-get install -y atom && \
   apm install markdown-preview-enhanced && \
-  apt-get install -y plantuml
+  apt-get install -y plantuml && \
+  apt-get install python-pip && \
+  pip install pyyaml
 ```
 
 ## Usage
@@ -44,7 +47,7 @@ $ python dc2uml.py fullpath/inputfile.yml fullpath/outputfile.md
 - See [output.md](examples/output.md)
 ![example](examples/output.jpeg)
 
-## Development plans
+## Future works
 - Refactoring
 - Support
   - Exception cases
@@ -52,6 +55,8 @@ $ python dc2uml.py fullpath/inputfile.yml fullpath/outputfile.md
   - Dockerfile
   - Other plantuml diagrams
   - Other text-based uml tools
+  - Offical plantuml format
+  - Redefine correspondence
 - Monolithic to microservices
 
 
