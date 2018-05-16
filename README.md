@@ -4,7 +4,7 @@ Convert docker-compose.yml to plantuml with atom:markdown-preview-enhanced using
 ## Purpose
 - Simplicity
   - Easy to develop
-- Frexibility
+- Flexibility
   - Function based microservices
     - Porting to serverless systems
 
@@ -58,7 +58,7 @@ $ python dc2uml.py fullpath/inputfile.yml fullpath/outputfile.md
   - Dockerfile
   - Other plantuml diagrams
   - Other text-based uml tools
-  - Offical plantuml format
+  - Official plantuml format
   - Redefine correspondence
 - Monolithic to microservices
 
