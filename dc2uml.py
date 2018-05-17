@@ -1,228 +1,246 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
-input_filename = sys.argv[1]
-output_filename = sys.argv[2]
-components_define = 'services'
-dependencies_define = 'depends_on'
-networks_define = 'networks'
-images_define = 'image'
-ports_define = 'ports'
-aliases_define = 'aliases'
 
-
-def open_yml(filename):
-    import yaml
-    with open(filename, 'r') as f:
-        data = yaml.load(f)
-    return data
-
-
-def _finditem(obj, key=components_define):
+def finditem(obj, key):
     if key in obj:
         return obj[key]
     for (k, v) in obj.items():
         if isinstance(v, dict):
-            return _finditem(v, key)
+            return finditem(v, key)
 
 
-def remove_restricted_str(target_str, remove_str):
-    modified_str = '_'.join(target_str.split(remove_str))
-    return modified_str
+
+# input_yml
+def open_yml(filename):
+    import yaml
+    with open(filename, 'r') as f:
+        dict = yaml.load(f)
+    return dict
 
 
-def make_dependencies_dict(data, services_name, key=components_define):
-    dependencies_dict = {}
-    for service in services_name:
+
+
+# pre-process_yml
+def remove_restricted_str(data_dict, before, after):
+    data_str=str(data_dict)
+    if before in data_str:
+        modified_str = after.join(data_str.split(before))
+        modified_dict=eval(modified_str)
+    return modified_dict
+
+
+# service:depends_on
+def extract_service_depends_on(data_dict):
+    ret = {}
+    for (k,v) in data_dict.items():
         tmp = []
-        depends = _finditem(data[key][service], dependencies_define)
-        if isinstance(depends, list):
-            for v in depends:
-                if '-' in v:
-                    tmp.append(remove_restricted_str(v, '-'))
-                else:
-                    tmp.append(v)
-            dependencies_dict.update({service: tmp})
+        items = finditem(v, 'depends_on')
+        if isinstance(items, list):
+            for i in items:
+                tmp.append(i)
+            ret.update({k: tmp})
         else:
             pass
-    return dependencies_dict
+    return ret
 
 
-def make_images_dict(data, services_name, key=components_define):
-    images_dict = {}
-    for service in services_name:
-        tmp = []
-        for v in [_finditem(data[key][service], images_define)]:
-            if '-' in v:
-                tmp.append(remove_restricted_str(v, '-'))
-            else:
-                tmp.append(v)
-        images_dict.update({service: tmp})
-    return images_dict
-
-
-def make_networks_dict(data, services_name, key=components_define):
-    networks_dict = {}
-    for service in services_name:
-        networks = _finditem(data[key][service], networks_define).keys()
-        if len(networks) > 1:
-            for i in networks:
-                if networks_dict.has_key(i):
-                    networks_dict[i].append(service)
-                else:
-                    networks_dict.update({i: [service]})
-        else:
-            if networks_dict.has_key(networks[0]):
-                networks_dict[networks[0]].append(service)
-            else:
-                networks_dict.update({networks[0]: [service]})
-    return networks_dict
-
-
-def make_components_dict(data, key=components_define):
-    components_dict = data[key]
-    return components_dict
-
-
-def combine_dependencies_str(dependencies_dict):
-    combined_dependencies_str = ''
-    for (k, v) in dependencies_dict.items():
+def convert_service_depends_on_to_uml(data_dict):
+    ret = ''
+    for (k, v) in data_dict.items():
         if v is None:
             pass
         elif isinstance(v, list):
             for i in v:
-                combined_dependencies_str = combined_dependencies_str \
+                ret = ret \
                     + '[' + k + ']' + ' --> ' + '[' + i + ']' + '\n'
         else:
-            combined_dependencies_str = combined_dependencies_str \
+            ret = ret \
                 + '[' + k + ']' + ' --> ' + '[' + v + ']' + '\n'
-    return combined_dependencies_str
+    return ret
 
 
-def combine_images_str(images_dict):
-    combined_images_str = ''
+
+# service:image
+def extract_service_image(data_dict):
+    ret = {}
+    for (k,v) in data_dict.items():
+        tmp = []
+        for i in [finditem(v, 'image')]:
+            tmp.append(i)
+        ret.update({k: tmp})
+    return ret
+
+
+def convert_service_image_to_uml(data_dict):
+    ret = ''
     prefix = 'cloud ' + 'Repository' + ' {\n'
     sufix = '}\n'
-    for (k, v) in images_dict.items():
+    for (k, v) in data_dict.items():
         if v is None:
             pass
         elif isinstance(v, list):
             for i in v:
-                combined_images_str = combined_images_str + '  [' + k \
+                ret = ret + '  [' + k \
                     + ']' + ' --> ' + '[' + i + ']' + '\n'
         else:
-            combined_images_str = combined_images_str + '  [' + k + ']' \
+            ret = ret + '  [' + k + ']' \
                 + ' --> ' + '[' + v + ']' + '\n'
-    combined_images_str = prefix + combined_images_str + sufix
-    return combined_images_str
+    ret = prefix + ret + sufix
+    return ret
 
 
-def make_components_str_dict(components_dict):
-    components_str_dict = {}
+# service:networks
+def extract_service_networks(data_dict):
+    ret = {}
+    for (k,v) in data_dict.items():
+        networks = finditem(data_dict, 'networks').keys()
+        if len(networks) > 1:
+            for i in networks:
+                if ret.has_key(i):
+                    ret[i].append(k)
+                else:
+                    ret.update({i: [k]})
+        else:
+            if ret.has_key(networks[0]):
+                ret[networks[0]].append(k)
+            else:
+                ret.update({networks[0]: [k]})
+    return ret
+
+
+
+def convert_service_networks_to_uml(data_dict):
+    return data_dict
+
+
+# service:services
+def extract_service_services(data_dict):
+    return data_dict
+
+
+def convert_service_services_to_uml(data_dict):
+    ret = {}
     prefix = 'component '
     sufix = '  ]'
-    for (k, v) in components_dict.items():
+    for (k, v) in data_dict.items():
         tmp = prefix + k + ' [' + k + '''
   ---
 '''
-        tmp = _add_ports(tmp, v)
-        tmp = _add_aliases(tmp, v)
+        tmp = add_ports(tmp, v)
+        tmp = add_aliases(tmp, v)
         tmp = tmp + sufix
-        components_str_dict.update({k: tmp})
-    return components_str_dict
+        ret.update({k: tmp})
+    return ret
 
 
-def _add_ports(target_str, content_dict):
-    ports = _finditem(content_dict, ports_define)
+def add_ports(uml, data_dict):
+    ports_define = 'ports'
+    ports = finditem(data_dict, ports_define)
     poarts_str = ''
     for i in ports:
         poarts_str = poarts_str + str(i) + ','
-    added_str = target_str + '  ' + ports_define + ':' + poarts_str + '\n'
+    added_str = uml + '  ' + ports_define + ':' + poarts_str + '\n'
     return added_str
 
 
-def _add_aliases(target_str, content_dict):
-    aliases = _finditem(content_dict[networks_define], aliases_define)
+def add_aliases(uml, data_dict):
+    aliases_define='aliases'
+    aliases = finditem(data_dict['networks'], aliases_define)# must modify
     aliases_str = ''
     for i in aliases:
         aliases_str = aliases_str + str(i) + ','
-    added_str = target_str + '  ' + aliases_define + ':' + aliases_str + '\n'
+    added_str = uml + '  ' + aliases_define + ':' + aliases_str + '\n'
     return added_str
 
 
-def make_networks_str(components_str_dict, networks_dict):
-    networks_str_dict = {}
+# combine_uml
+def combine_network_component_uml(networks_dict,services_dict):
+    ret = {}
     networks_str = ''
     for (k, v) in networks_dict.items():
         if isinstance(v, list):
             for i in v:
                 networks_str = networks_str + '  ' \
-                    + components_str_dict[i] + '\n'
+                    + services_dict[i] + '\n'
         else:
-            networks_str = networks_str + '  ' + components_str_dict[v] \
+            networks_str = networks_str + '  ' + services_dict[v] \
                 + '\n'
         prefix = 'package ' + k + ' {\n'
         sufix = '}\n'
-        networks_str_dict.update({k: prefix + networks_str + sufix})
-    return networks_str_dict
+        ret.update({k: prefix + networks_str + sufix})
+    return ret
 
 
-def combine_networks(networks_str_dict):
-    combine_networks_str = ''
-    for (k, v) in networks_str_dict.items():
-        combined_networks_str = combine_networks_str + v
-    return combined_networks_str
+def combine_networks_uml(networks_uml_dict):
+    ret = ''
+    for (k, v) in networks_uml_dict.items():
+        ret = ret + v
+    return ret
 
 
-def combine_net_and_dep(combined_networks_str,
-                        combined_dependencies_str, combined_images_str):
-    return combined_networks_str + '\n' + combined_dependencies_str \
-        + '\n' + combined_images_str
+def combine_uml(networks_uml,
+                        depends_on_uml, image_uml):
+    return networks_uml + '\n' + depends_on_uml \
+        + '\n' + image_uml
 
 
-def combine_puml(combined_net_and_dep_str):
+
+def combine_puml_with_atom_md(raw_uml):
     prefix = '```puml\n'
     sufix = '```'
-    combined_puml_str = prefix + combined_net_and_dep_str + sufix
-    return combined_puml_str
+    return prefix + raw_uml + sufix
 
 
-def save_md(str):
+# output_uml
+def save_md(uml,output_filename):
     with open(output_filename, 'w') as f:
-        f.write(str)
+        f.write(uml)
 
 
 def main():
-    data = open_yml(input_filename)
-    components_name = _finditem(data).keys()
-    components_name_mod = []
-    for i in components_name:
-        if '-' in i:
-            modified_str = remove_restricted_str(i, '-')
-            data[components_define][modified_str] = \
-                data[components_define].pop(i)
-            components_name_mod.append(modified_str)
-        else:
-            components_name_mod.append(i)
-    dependencies_dict = make_dependencies_dict(data,
-            components_name_mod)
-    images_dict = make_images_dict(data, components_name_mod)
-    networks_dict = make_networks_dict(data, components_name_mod)
-    components_dict = make_components_dict(data)
-    combined_dependencies_str = \
-        combine_dependencies_str(dependencies_dict)
-    combined_images_str = combine_images_str(images_dict)
-    components_str_dict = make_components_str_dict(components_dict)
-    networks_str_dict = make_networks_str(components_str_dict,
-            networks_dict)
-    combined_networks_str = combine_networks(networks_str_dict)
-    combined_net_and_dep_str = \
-        combine_net_and_dep(combined_networks_str,
-                            combined_dependencies_str,
-                            combined_images_str)
-    combined_puml_str = combine_puml(combined_net_and_dep_str)
-    save_md(combined_puml_str)
+    import sys
+    #----
+    # input
+    #----
+    data_dict = open_yml(sys.argv[1])
+    #----
+    # pre-process
+    #----
+    data_dict_preprocessed=remove_restricted_str(data_dict,"-","_")
+    #data_dict_preprocessed=data_dict
+    #----
+    # process depends_on
+    #----
+    print(data_dict_preprocessed)
+    depends_on_data_dict = extract_service_depends_on(data_dict_preprocessed['services'])
+    depends_on_uml=convert_service_depends_on_to_uml(depends_on_data_dict)
+    #----
+    # process image
+    #----
+    image_data_dict = extract_service_image(data_dict_preprocessed['services'])
+    image_uml=convert_service_image_to_uml(image_data_dict)
+    #----
+    # process networks
+    #----
+    networks_data_dict = extract_service_networks(data_dict_preprocessed['services'])
+    #networks_uml=convert_service_networks_to_uml(networks_data_dict)
+    #----
+    # process services
+    #----
+    #services_data_dict = extract_service_services(data_dict_preprocessed['services'])
+    services_uml=convert_service_services_to_uml(data_dict_preprocessed['services'])
+    #----
+    # comEbine_uml
+    #----
+    networks_uml_dict=combine_network_component_uml(networks_data_dict,services_uml)
+    networks_uml=combine_networks_uml(networks_uml_dict)
+    raw_uml=combine_uml(networks_uml,depends_on_uml,image_uml)
+    uml=combine_puml_with_atom_md(raw_uml)
+    #----
+    # output_uml
+    #----
+    save_md(uml,sys.argv[2])
 
 
 if __name__ == '__main__':

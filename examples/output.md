@@ -3,7 +3,7 @@ package mynetwork {
   component ubuntu_desktop [ubuntu_desktop
   ---
   ports:8080:8080,5900:5900,
-  aliases:ubuntu-desktop.com,
+  aliases:ubuntu_desktop.com,
   ]
   component gitlab_chprot [gitlab_chprot
   ---
@@ -13,7 +13,7 @@ package mynetwork {
   component swagger_ui [swagger_ui
   ---
   ports:6080:80,
-  aliases:swagger-ui.com,
+  aliases:swagger_ui.com,
   ]
 }
 
